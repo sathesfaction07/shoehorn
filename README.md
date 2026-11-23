@@ -1,15 +1,18 @@
 # DocConsolidator
 
-Reads documents from four formats into one model, then reports what the **target** format cannot
-hold — because "preserve structure" is a property of the target, not of the parser.
+Turning PDFs, Word files and web pages into Markdown looks like a parsing problem, so teams
+shop for a better parser. The loss usually happens one step later: Markdown cannot express a
+merged table cell, so no parser, layout model or OCR service can carry one across.
+DocConsolidator reads four input formats into one document model, then reports, feature by
+feature, what the format you are writing *to* cannot hold.
 
-No model. The accuracy problem is grammar and arithmetic.
+Everything here is grammar and counting; there is no model to tune.
 
 ---
 
-## The Brief Measures the Wrong Axis
+## Parser Accuracy Is the Wrong Axis
 
-The spec rates four approaches by parser quality — BeautifulSoup at "~90%", Docling at ~95%,
+The requirements note this project started from rates four approaches by parser quality — BeautifulSoup at "~90%", Docling at ~95%,
 cloud OCR at "~99% on PDFs" — and concludes *"hybrid routing by format."*
 
 Checking that first produced two things:
