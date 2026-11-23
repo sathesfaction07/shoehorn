@@ -12,7 +12,7 @@ at "~90% (misses images-with-text, breaks on exotic formatting)", Docling at ~95
 
 Two things came out of checking that before building.
 
-**The routing already exists.** CertValidator dispatches on file extension, renders PDFs through
+**The routing already exists.** Certainty dispatches on file extension, renders PDFs through
 PyMuPDF and has a Textract backend. So the brief's headline recommendation is built, one
 directory across.
 
@@ -88,7 +88,7 @@ and a *relationship* does not.
 It is the only feature that is a property of the **source**: the content is pixels and the
 source never provided it as text. A matrix that let json rescue it would be claiming OCR this
 tool does not do. `has_embedded_text` is therefore **declared** metadata read from an attribute,
-never inferred — stated plainly because MultiExtract shipped a claim of "content-based format
+never inferred — stated plainly because Headcount shipped a claim of "content-based format
 sniffing" for metadata that was likewise declared, and that entry had to be corrected later.
 
 ## Validation
@@ -133,9 +133,9 @@ sniffing" for metadata that was likewise declared, and that entry had to be corr
 
 **Neutral**
 
-- This is the same *shape* as CaseSearch's finding that blocking sets a recall ceiling no matcher
+- This is the same *shape* as Kinship's finding that blocking sets a recall ceiling no matcher
   can exceed, and saying so is better than implying novelty. The difference is that blocking keys
   are a free choice while a publishing target usually is not — you often must publish to the wiki
 - The cloud-OCR routing in the brief was declined rather than rebuilt, and the reason is
   duplication rather than disagreement: for a scanned PDF, Textract genuinely is the right answer
-  and CertValidator already calls it
+  and Certainty already calls it

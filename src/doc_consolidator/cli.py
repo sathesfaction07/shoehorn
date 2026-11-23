@@ -51,7 +51,7 @@ def _find(docs: Path, doc_id: str) -> Path:
         if path.is_file() and path.stem == doc_id:
             return path
     raise click.ClickException(
-        f"no document {doc_id!r} in {docs}; try `doc-consolidator report`"
+        f"no document {doc_id!r} in {docs}; try `shoehorn report`"
     )
 
 

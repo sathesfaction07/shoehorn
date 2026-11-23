@@ -34,7 +34,7 @@ jobs:
         run: pytest -q --cov=doc_consolidator --cov-report=term-missing
 
       - name: Doctor runs with no credentials and no network
-        run: doc-consolidator doctor
+        run: shoehorn doctor
 
       - name: The capability matrix re-derives, and the pipe-row arithmetic holds
         run: |
@@ -243,7 +243,7 @@ jobs:
 
       - name: The two questions come apart on the shipped corpus
         run: |
-          doc-consolidator report -o /tmp/out
+          shoehorn report -o /tmp/out
           python - <<'PY'
           import json
           from pathlib import Path
@@ -293,43 +293,43 @@ jobs:
 
       - name: check gates on what is fixable, not on the world
         run: |
-          doc-consolidator check
-          doc-consolidator check | grep -q 'Reported and NOT failed on'
-          doc-consolidator check | grep -q 'heading skips:              4'
-          doc-consolidator check | grep -q 'merged-cell grid positions: 7'
-          doc-consolidator check | grep -q 'switched off inside a week'
-          doc-consolidator check | grep -q PASS
+          shoehorn check
+          shoehorn check | grep -q 'Reported and NOT failed on'
+          shoehorn check | grep -q 'heading skips:              4'
+          shoehorn check | grep -q 'merged-cell grid positions: 7'
+          shoehorn check | grep -q 'switched off inside a week'
+          shoehorn check | grep -q PASS
 
           mkdir -p /tmp/bad && printf '\x00\x01' > /tmp/bad/scan.tiff
-          ! DC_DOCS=/tmp/bad doc-consolidator check
-          DC_DOCS=/tmp/bad doc-consolidator check | grep -q 'no parser for 1' || true
+          ! DC_DOCS=/tmp/bad shoehorn check
+          DC_DOCS=/tmp/bad shoehorn check | grep -q 'no parser for 1' || true
 
           mkdir -p /tmp/span && cat > /tmp/span/t.html <<'HTML'
           <h1>T</h1><table><tr><th colspan="2">Q1</th></tr><tr><td>a</td><td>b</td></tr></table>
           HTML
-          DC_DOCS=/tmp/span doc-consolidator check
-          DC_DOCS=/tmp/span doc-consolidator check | grep -q 'merged-cell grid positions: 1'
+          DC_DOCS=/tmp/span shoehorn check
+          DC_DOCS=/tmp/span shoehorn check | grep -q 'merged-cell grid positions: 1'
           echo "a spanning header alone does not gate"
 
       - name: Every command publishes its reasoning
         run: |
-          doc-consolidator matrix | grep -q 'A pipe row holds'
-          doc-consolidator matrix | grep -q 'this tool does not OCR'
-          doc-consolidator compare | grep -q 'belongs to the FORMAT, not to the reader'
-          doc-consolidator compare | grep -q 'choosing presentation on their behalf'
-          doc-consolidator compare | grep -q 'markdown loses 18 where wiki loses 8'
-          doc-consolidator report | grep -q "cannot see the second question's failure"
-          doc-consolidator collapse | grep -q 'exactly Catalan(n) while n <= 6'
-          doc-consolidator collapse --max-n 7 | grep -q 'differs'
-          doc-consolidator outline h02-skip | grep -q 'Neither is a fix'
-          doc-consolidator outline h03-starts-deep | grep -q 'level 0 -> 3'
-          doc-consolidator table h04-merged | grep -q 'distinct-value SET unchanged'
-          doc-consolidator table h06-ragged | grep -q 'no grid exists'
-          doc-consolidator encoding | grep -q 'never a necessity'
-          doc-consolidator encoding | grep -q 'PREFERRED, not detected'
-          doc-consolidator convert h04-merged --target wiki | grep -q 'holds every feature'
-          doc-consolidator explain h04-merged | grep -q 'BEFORE any conversion'
-          doc-consolidator doctor | grep -q 'rest on IMPLEMENTATION behaviour'
+          shoehorn matrix | grep -q 'A pipe row holds'
+          shoehorn matrix | grep -q 'this tool does not OCR'
+          shoehorn compare | grep -q 'belongs to the FORMAT, not to the reader'
+          shoehorn compare | grep -q 'choosing presentation on their behalf'
+          shoehorn compare | grep -q 'markdown loses 18 where wiki loses 8'
+          shoehorn report | grep -q "cannot see the second question's failure"
+          shoehorn collapse | grep -q 'exactly Catalan(n) while n <= 6'
+          shoehorn collapse --max-n 7 | grep -q 'differs'
+          shoehorn outline h02-skip | grep -q 'Neither is a fix'
+          shoehorn outline h03-starts-deep | grep -q 'level 0 -> 3'
+          shoehorn table h04-merged | grep -q 'distinct-value SET unchanged'
+          shoehorn table h06-ragged | grep -q 'no grid exists'
+          shoehorn encoding | grep -q 'never a necessity'
+          shoehorn encoding | grep -q 'PREFERRED, not detected'
+          shoehorn convert h04-merged --target wiki | grep -q 'holds every feature'
+          shoehorn explain h04-merged | grep -q 'BEFORE any conversion'
+          shoehorn doctor | grep -q 'rest on IMPLEMENTATION behaviour'
           echo "all commands explain themselves"
 
   test-windows:

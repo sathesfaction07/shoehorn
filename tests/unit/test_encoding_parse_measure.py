@@ -144,7 +144,7 @@ class TestTheParsersAgreeOnOneModel:
         assert cells[0]._tc is cells[1]._tc, "the same element, yielded twice"
 
     def test_reading_only_paragraphs_loses_every_table_cell(self, docs_dir):
-        """The defect this project's diligence check found in CertValidator."""
+        """The defect this project's diligence check found in Certainty."""
         from docx import Document as DocxDocument
 
         doc = DocxDocument(str(docs_dir / "d01-merged.docx"))

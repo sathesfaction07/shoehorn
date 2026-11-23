@@ -16,7 +16,7 @@ Whereas being WRONG keeps everything:
 Mojibake is an injective map on the bytes it accepts, so it is invertible. Replacement is
 not. **The lossy handler is the "safe" one, and the wrong one is recoverable.**
 
-This is the same shape as InitiativeHub's ambiguous dates -- a value that fails loudly is
+This is the same shape as Doubletake's ambiguous dates -- a value that fails loudly is
 safer than one that succeeds quietly -- and it is worth saying that plainly rather than
 presenting it as new. What is different here is that the number of competing readings is
 COUNTABLE (see `candidate_decodings`) and the damage is REVERSIBLE, which is a stronger
@@ -110,7 +110,7 @@ def no_undecodable_bytes() -> tuple[int, int]:
 
     Which means every `errors="replace"` in a codebase is a CHOICE to discard information
     that could have been kept, not a necessity forced by bad input. The portfolio contains
-    one: CertValidator's `read_text_file` reads with `errors="replace"`.
+    one: Certainty's `read_text_file` reads with `errors="replace"`.
     """
     rejected = 0
     for value in range(256):

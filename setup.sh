@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Sets up DocConsolidator and re-derives every finding in the README from scratch.
+# Sets up Shoehorn and re-derives every finding in the README from scratch.
 # Nothing here is asserted from memory: each block computes its number and fails loudly.
 set -euo pipefail
 
 cd "$(dirname "$0")"
 
 echo "=============================================================================="
-echo " DocConsolidator -- setup"
+echo " Shoehorn -- setup"
 echo "=============================================================================="
 
 if [ ! -d .venv ]; then
@@ -320,15 +320,15 @@ echo "==========================================================================
 cat <<'EOF'
   source .venv/bin/activate
 
-  doc-consolidator doctor              config, and which matrix claims are weaker
-  doc-consolidator matrix              what each target format can express
-  doc-consolidator compare             all four targets over one corpus
-  doc-consolidator report              per-document losses, and the silent ones
-  doc-consolidator check               exit 1 on what is fixable at source
-  doc-consolidator collapse            the Catalan collapse, brute forced
-  doc-consolidator outline h02-skip    one source, two readings, two trees
-  doc-consolidator table h04-merged    the merged-cell dichotomy
-  doc-consolidator encoding            why errors='replace' is the lossy choice
-  doc-consolidator convert h04-merged  emit, then say what was lost
-  doc-consolidator explain h04-merged  one document against every target
+  shoehorn doctor              config, and which matrix claims are weaker
+  shoehorn matrix              what each target format can express
+  shoehorn compare             all four targets over one corpus
+  shoehorn report              per-document losses, and the silent ones
+  shoehorn check               exit 1 on what is fixable at source
+  shoehorn collapse            the Catalan collapse, brute forced
+  shoehorn outline h02-skip    one source, two readings, two trees
+  shoehorn table h04-merged    the merged-cell dichotomy
+  shoehorn encoding            why errors='replace' is the lossy choice
+  shoehorn convert h04-merged  emit, then say what was lost
+  shoehorn explain h04-merged  one document against every target
 EOF

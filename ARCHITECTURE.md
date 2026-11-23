@@ -1,4 +1,4 @@
-# DocConsolidator — Technical Architecture
+# Shoehorn — Technical Architecture
 
 ## Overview
 
@@ -16,7 +16,7 @@ No model. The accuracy problem is grammar and arithmetic.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                        CLI (doc-consolidator)                                 │
+│                        CLI (shoehorn)                                 │
 │                                                                              │
 │  doctor     config, parsers, and WHICH MATRIX CLAIMS ARE WEAKER than the rest  │
 │  matrix     what each target can express -- the ceiling, in one table          │
@@ -224,7 +224,7 @@ No model. The accuracy problem is grammar and arithmetic.
 │    2x2 table yields 3 paragraphs, none                                        │
 │    of the 4 cell values, and logs a                                           │
 │    confident "Read 3 paragraphs". That                                        │
-│    is CertValidator's read_docx_file.                                         │
+│    is Certainty's read_docx_file.                                         │
 │                                                                              │
 │  wiki, markdown  hand-written, so a                                           │
 │    round trip goes through the SAME                                           │
@@ -234,7 +234,7 @@ No model. The accuracy problem is grammar and arithmetic.
 │    a statement about that library.                                            │
 │                                                                              │
 │  has_embedded_text is DECLARED, never                                         │
-│    detected. Stated because MultiExtract                                      │
+│    detected. Stated because Headcount                                      │
 │    shipped a "content-based format                                            │
 │    sniffing" claim for metadata that was                                      │
 │    likewise declared.                                                         │
@@ -305,7 +305,7 @@ latin-1 rejects 0 of 256 bytes. The wrong answer is recoverable; the careful one
 ## Data Flow
 
 ```
-1.  doc-consolidator report
+1.  shoehorn report
 2.  route by EXTENSION (declared metadata, not sniffed); 23 documents, 4 formats
 3.  decode: 20 clean, 2 mojibake (one whole-file, one partial), 1 ambiguous
       the ambiguous one: 4 codecs accepted it, 3 distinct strings, cp1252 PREFERRED

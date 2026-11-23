@@ -1,9 +1,9 @@
-# DocConsolidator
+# Shoehorn
 
 Turning PDFs, Word files and web pages into Markdown looks like a parsing problem, so teams
 shop for a better parser. The loss usually happens one step later: Markdown cannot express a
 merged table cell, so no parser, layout model or OCR service can carry one across.
-DocConsolidator reads four input formats into one document model, then reports, feature by
+Shoehorn reads four input formats into one document model, then reports, feature by
 feature, what the format you are writing *to* cannot hold.
 
 Everything here is grammar and counting; there is no model to tune.
@@ -17,7 +17,7 @@ cloud OCR at "~99% on PDFs" — and concludes *"hybrid routing by format."*
 
 Checking that first produced two things:
 
-**The routing already exists.** CertValidator dispatches on extension, renders PDFs through
+**The routing already exists.** Certainty dispatches on extension, renders PDFs through
 PyMuPDF and has a Textract backend. The headline recommendation is built, one directory across.
 
 **And it would not have helped.** Markdown has no construct for a merged table cell. No parser,
@@ -147,7 +147,7 @@ them. And the stronger form:
 > strings.
 
 Every `errors="replace"` is therefore a decision to discard information that could have been kept.
-The portfolio contains one: CertValidator's `read_text_file`.
+The portfolio contains one: Certainty's `read_text_file`.
 
 `AMBIGUOUS` records that four codecs accepted the same bytes and produced **three different
 strings**, and that cp1252 was **preferred, not detected**.
@@ -162,7 +162,7 @@ the scan is per line, and the corpus carries both cases.
 
 ## Two Defects in Existing Portfolio Code, Verified
 
-**CertValidator's `read_docx_file` drops every table.** It does
+**Certainty's `read_docx_file` drops every table.** It does
 `[p.text for p in doc.paragraphs]`, and `doc.paragraphs` excludes cell text entirely. On a
 document with one 2×2 table it yields 3 paragraphs, none of the 4 cell values, and logs a
 confident *"Read 3 paragraphs"*.
@@ -180,17 +180,17 @@ indication. Not a criticism of the library — the XML carries the truth in `gri
 bash setup.sh                          # re-derives every finding above
 source .venv/bin/activate
 
-doc-consolidator doctor                # config, and which matrix claims are weaker
-doc-consolidator matrix                # what each target can express
-doc-consolidator compare               # all four targets, one corpus
-doc-consolidator report                # per-document losses, and the silent ones
-doc-consolidator check                 # exit 1 on what is fixable at source
-doc-consolidator collapse              # the Catalan collapse, brute forced
-doc-consolidator outline h02-skip      # one source, two readings, two trees
-doc-consolidator table h04-merged      # the merged-cell dichotomy
-doc-consolidator encoding              # why replace is the lossy choice
-doc-consolidator convert h04-merged    # emit, then say what was lost
-doc-consolidator explain h04-merged    # one document against every target
+shoehorn doctor                # config, and which matrix claims are weaker
+shoehorn matrix                # what each target can express
+shoehorn compare               # all four targets, one corpus
+shoehorn report                # per-document losses, and the silent ones
+shoehorn check                 # exit 1 on what is fixable at source
+shoehorn collapse              # the Catalan collapse, brute forced
+shoehorn outline h02-skip      # one source, two readings, two trees
+shoehorn table h04-merged      # the merged-cell dichotomy
+shoehorn encoding              # why replace is the lossy choice
+shoehorn convert h04-merged    # emit, then say what was lost
+shoehorn explain h04-merged    # one document against every target
 ```
 
 | Command | Exit |
@@ -245,20 +245,20 @@ have made a completeness check report *more* content after conversion than the s
 
 ## Scope: What This Deliberately Does Not Do
 
-**Route PDFs to Textract or Document AI**, which the brief asks for. CertValidator already does
+**Route PDFs to Textract or Document AI**, which the brief asks for. Certainty already does
 it, and for a scanned PDF that genuinely is the right answer. Declined as duplication, not
 disagreement.
 
-**Deduplicate across sources**, also asked for. That is CaseSearch — normalisation, blocking,
+**Deduplicate across sources**, also asked for. That is Kinship — normalisation, blocking,
 clustering and cluster metrics — and rebuilding it here would be a worse copy.
 
 **OCR images that contain text.** `has_embedded_text` is **declared** metadata, never inferred.
-Said plainly because MultiExtract shipped a claim of "content-based format sniffing" for metadata
+Said plainly because Headcount shipped a claim of "content-based format sniffing" for metadata
 that was likewise declared, and that entry needed correcting later.
 
 The diligence check found heading handling, `colspan`/`rowspan`, document outlines,
 BeautifulSoup, wiki markup and mojibake detection **absent portfolio-wide** (0 files each).
-KeyExtract builds a tree, but it is an AST for boolean expressions — so tree-building is a repeat
+Polarity builds a tree, but it is an AST for boolean expressions — so tree-building is a repeat
 mechanism and is named as one. What is new is that this map is **not injective**.
 
 ---
@@ -290,7 +290,7 @@ corpus test allows this explicitly rather than pretending otherwise.
 **Nothing here fixes anything.** Publish to a format that can hold your content, or stop putting
 merged cells in source documents.
 
-This is the same *shape* as CaseSearch's blocking ceiling — an upstream constraint no downstream
+This is the same *shape* as Kinship's blocking ceiling — an upstream constraint no downstream
 stage can exceed — and saying so beats implying novelty. The difference: blocking keys are a free
 choice, and you often must publish to the wiki.
 

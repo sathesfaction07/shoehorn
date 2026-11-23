@@ -96,7 +96,7 @@ them. And the stronger form:
 > byte strings.
 
 So every `errors="replace"` in a codebase is a decision to discard information that could have
-been kept. The portfolio contains one: CertValidator's `read_text_file`.
+been kept. The portfolio contains one: Certainty's `read_text_file`.
 
 `Decoding` has four values because "we decoded it" is not one claim. `AMBIGUOUS` records that four
 codecs accepted the bytes and produced **three different strings**, and that cp1252 was
@@ -156,7 +156,7 @@ costume.
 
 **Neutral**
 
-- The encoding finding is the same shape as InitiativeHub's ambiguous dates — a loud failure is
+- The encoding finding is the same shape as Doubletake's ambiguous dates — a loud failure is
   safer than a quiet success — and this says so rather than presenting it as new. What is
   different: here the competing readings are **countable** and the damage is **reversible**
 - python-docx returning the same `_tc` twice for a merged row is the DUPLICATE policy applied by

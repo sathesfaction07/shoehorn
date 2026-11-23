@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "doc-consolidator"
+name = "shoehorn"
 version = "0.1.0"
 description = "Consolidates documents from four formats, and reports what the TARGET format cannot hold"
 requires-python = ">=3.11"
@@ -27,7 +27,7 @@ dev = [
 ]
 
 [project.scripts]
-doc-consolidator = "doc_consolidator.cli:cli"
+shoehorn = "doc_consolidator.cli:cli"
 
 [tool.setuptools.packages.find]
 where = ["src"]

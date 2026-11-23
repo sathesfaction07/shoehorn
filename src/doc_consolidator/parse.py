@@ -9,7 +9,7 @@ Two notes on what these do NOT do.
 
 **`has_embedded_text` is DECLARED, never detected.** Whether an image contains text is not
 knowable without OCR, which this tool does not perform. HTML carries the declaration in a
-`data-contains-text` attribute and the corpus sets it. This is stated because MultiExtract
+`data-contains-text` attribute and the corpus sets it. This is stated because Headcount
 shipped a claim of "content-based format sniffing" for metadata that was likewise declared,
 and that entry had to be corrected later.
 
