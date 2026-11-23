@@ -1,0 +1,333 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check src tests data
+
+      - name: Corpus is reproducible from the generator
+        run: |
+          python data/generate.py
+          test "$(ls data/docs | wc -l)" -eq 23
+
+      - name: Test
+        run: pytest -q --cov=doc_consolidator --cov-report=term-missing
+
+      - name: Doctor runs with no credentials and no network
+        run: doc-consolidator doctor
+
+      - name: The capability matrix re-derives, and the pipe-row arithmetic holds
+        run: |
+          python - <<'PY'
+          from doc_consolidator.formats import TARGETS, expressiveness, verify_claims
+          from doc_consolidator.models import Expressiveness, Feature
+
+          assert verify_claims() == [], verify_claims()
+
+          # The arithmetic the merged-cell claim rests on, performed rather than asserted.
+          for row, expected in (("| a | b |", 2), ("| a | b | c |", 3)):
+              assert len([c for c in row.split("|") if c.strip()]) == expected
+
+          assert expressiveness("markdown", Feature.MERGED_CELL) is Expressiveness.ABSENT
+          assert expressiveness("wiki", Feature.MERGED_CELL) is Expressiveness.NATIVE
+
+          # No target may claim to recover text from pixels, including the control.
+          for name in TARGETS:
+              assert expressiveness(name, Feature.IMAGE_TEXT) is not Expressiveness.NATIVE
+
+          # A claim of limited expressiveness without a reason must be rejected outright.
+          from doc_consolidator.formats import Capability
+          try:
+              Capability(Expressiveness.ABSENT, "")
+              raise AssertionError("a reasonless claim was accepted")
+          except ValueError:
+              pass
+          print("matrix verified; markdown cannot hold a span and wiki can")
+          PY
+
+      - name: A merged cell has no grid representation and both repairs are wrong
+        run: |
+          python - <<'PY'
+          from doc_consolidator.models import Cell
+          from doc_consolidator.tables import (
+              FlattenPolicy, distinct_values, flatten, occupancy,
+          )
+
+          def C(t, cs=1, rs=1):
+              return Cell(text=t, colspan=cs, rowspan=rs)
+
+          colspan = ((C("Q1", cs=2),), (C("Jan"), C("Feb")))
+          rowspan = ((C("EMEA", rs=2), C("London")), (C("Berlin"),))
+          ragged = ((C("Summary"),), (C("a"), C("b"), C("c")))
+
+          occ = occupancy(colspan)
+          assert (occ.rows, occ.cols, occ.cell_count, occ.positions) == (2, 2, 3, 4)
+          assert occ.merged_cells == 1
+          assert occ.covered_positions == occ.positions
+          assert occ.shape.value == "rectangular"
+
+          # rowspan handled properly; a colspan-only count would call this ragged.
+          assert occupancy(rowspan).shape.value == "rectangular"
+          assert [sum(c.colspan for c in row) for row in rowspan] == [2, 1]
+
+          assert occupancy(ragged).shape.value == "ragged"
+          assert occupancy(ragged).holes == 2
+
+          dup = flatten(colspan, FlattenPolicy.DUPLICATE)
+          blank = flatten(colspan, FlattenPolicy.BLANK)
+          assert dup.grid == (("Q1", "Q1"), ("Jan", "Feb"))
+          assert blank.grid == (("Q1", ""), ("Jan", "Feb"))
+          assert dup.duplicated_positions == 1 and blank.blanked_positions == 1
+          assert not dup.is_faithful and not blank.is_faithful
+
+          # THE reason the loss is silent: neither policy changes the value set.
+          source = {c.text for row in colspan for c in row}
+          for policy in FlattenPolicy:
+              flat = flatten(colspan, policy)
+              assert {v for row in flat.grid for v in row if v} == source
+              assert distinct_values(flat.grid) == len(source)
+
+          # The counter that did not exist in the first version.
+          assert flatten(ragged, FlattenPolicy.DUPLICATE).padded_positions == 2
+          print("3 cells over 4 positions; both repairs wrong; value set unchanged either way")
+          PY
+
+      - name: The outline collapse is exactly Catalan(n), and breaks by one at seven
+        run: |
+          python - <<'PY'
+          from math import comb
+
+          from doc_consolidator.models import Block
+          from doc_consolidator.outline import (
+              MAX_LEVEL, Reading, build_outline, collapse_census, depth_signature, max_depth,
+          )
+
+          def H(*levels):
+              return tuple(
+                  Block(kind="heading", level=lv, text=f"h{lv}#{i}")
+                  for i, lv in enumerate(levels)
+              )
+
+          # The concrete collision.
+          assert depth_signature(build_outline(H(1, 3), Reading.PROMOTE)) == \
+                 depth_signature(build_outline(H(1, 2), Reading.PROMOTE)) == (1, 2)
+
+          # The readings disagree on the same source.
+          assert max_depth(build_outline(H(1, 3), Reading.PROMOTE)) == 2
+          assert max_depth(build_outline(H(1, 3), Reading.IMPLICIT)) == 3
+
+          for n in range(1, 8):
+              total, distinct = collapse_census(n, Reading.PROMOTE)
+              catalan = comb(2 * n, n) // (n + 1)
+              assert total == MAX_LEVEL**n
+              if n <= MAX_LEVEL:
+                  assert distinct == catalan, (n, distinct, catalan)
+              else:
+                  # Short by exactly one: the depth-7 chain six levels cannot express.
+                  assert catalan - distinct == 1, (n, distinct, catalan)
+
+          # The source block must never be rewritten in place.
+          source = H(1, 3)
+          build_outline(source, Reading.PROMOTE)
+          assert source[1].level == 3
+          print("Catalan(n) exact to n=6, short by exactly 1 at n=7")
+          PY
+
+      - name: The safe-looking encoding handler is the lossy one
+        run: |
+          python - <<'PY'
+          import random
+
+          from doc_consolidator.encoding import (
+              Decoding, candidate_decodings, compare_handlers, decode_bytes,
+              looks_like_mojibake, mojibake_lines, no_undecodable_bytes, repair_mojibake,
+          )
+
+          assert no_undecodable_bytes() == (0, 256)
+
+          handlers = compare_handlers(b"caf\xe9")
+          assert handlers["utf-8 + replace"][1] is False
+          assert handlers["utf-8 + ignore"][1] is False
+          assert handlers["cp1252 (wrong)"] == ("café", True)
+
+          # Four codecs accept, three distinct readings, cp1252 preferred not detected.
+          candidates = candidate_decodings(b"caf\xe9")
+          assert len(candidates) == 4 and len(set(candidates.values())) == 3
+          result = decode_bytes(b"caf\xe9")
+          assert result.decoding is Decoding.AMBIGUOUS
+          assert result.codec_used == "cp1252" and result.candidates == 3
+          assert "PREFERRED" in result.detail
+
+          # LOSSY unreachable by default...
+          rng = random.Random(7)
+          seen = set()
+          for _ in range(4000):
+              raw = bytes(rng.randrange(256) for _ in range(rng.randint(1, 12)))
+              seen.add(decode_bytes(raw).decoding)
+          assert Decoding.LOSSY not in seen
+          # ...and reachable under a restricted list, so the branch is not dead code.
+          restricted = decode_bytes(b"caf\xe9", codecs=("ascii",))
+          assert restricted.decoding is Decoding.LOSSY
+          assert restricted.recoverable is False
+
+          # Mis-decoding is invertible; replacement is not.
+          broken = "Café Münster".encode("utf-8").decode("cp1252")
+          assert repair_mojibake(broken) == "Café Münster"
+
+          # Partial mojibake defeats a whole-text round trip.
+          mixed = "\n".join([broken, "Jean-Léon", "ascii"])
+          try:
+              mixed.encode("cp1252").decode("utf-8")
+              raise AssertionError("the whole-text round trip should have failed")
+          except UnicodeDecodeError:
+              pass
+          assert mojibake_lines(mixed) == [0]
+          found, note = looks_like_mojibake(mixed)
+          assert found and "1 of 3 lines" in note and "would call this clean" in note
+          print("latin-1 rejects nothing, so replace is always a choice")
+          PY
+
+      - name: Two verified defects in the way DOCX is usually read
+        run: |
+          python - <<'PY'
+          from docx import Document as DocxDocument
+
+          from doc_consolidator.parse import parse_file
+          from doc_consolidator.tables import occupancy
+
+          path = "data/docs/d01-merged.docx"
+          doc = DocxDocument(path)
+
+          # (1) doc.paragraphs excludes cell text entirely.
+          paragraphs_only = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+          assert doc.tables, "the document has a table"
+          for value in ("Leeds", "York", "Bristol", "4200"):
+              assert value not in paragraphs_only, f"{value} unexpectedly present"
+
+          # (2) row.cells yields the same element once per grid column, so a naive read
+          #     applies the DUPLICATE policy silently.
+          cells = doc.tables[0].rows[0].cells
+          assert [c.text for c in cells][0] == [c.text for c in cells][1]
+          assert cells[0]._tc is cells[1]._tc
+
+          # The XML path recovers the truth.
+          parsed = parse_file(__import__("pathlib").Path(path))
+          table = next(b for b in parsed.walk() if b.kind == "table")
+          rows = tuple(r.cells for r in table.children if r.kind == "row")
+          occ = occupancy(rows)
+          assert (occ.cell_count, occ.positions, occ.merged_cells) == (8, 9, 1)
+          for value in ("Leeds", "York", "Bristol", "4200"):
+              assert value in parsed.text_content
+          print("paragraphs-only drops every cell; row.cells duplicates the merged value")
+          PY
+
+      - name: The two questions come apart on the shipped corpus
+        run: |
+          doc-consolidator report -o /tmp/out
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          from doc_consolidator.emit import emit
+          from doc_consolidator.measure import compare_targets
+          from doc_consolidator.parse import parse_file
+
+          payload = json.load(open("/tmp/out/report.json"))
+          assert payload["documents"] == 23
+          assert payload["total_features"] == 98
+          assert payload["total_lost"] == 18
+          assert payload["by_fidelity"]["invented"] == 9
+          assert len(payload["silent_docs"]) == 13
+          assert payload["unrecoverable"] == []
+          assert payload["encoding_counts"]["mojibake"] == 2
+          assert payload["encoding_counts"]["ambiguous"] == 1
+
+          # The ceiling ordering must match the measured ordering.
+          reports = compare_targets(Path("data/docs"))
+          by_result = sorted(reports, key=lambda n: reports[n].total_lost)
+          table = payload["ceiling"]
+          by_ceiling = sorted(table, key=lambda n: table[n][1])
+          assert by_result == by_ceiling == ["json", "wiki", "markdown", "plain"], by_result
+
+          # Same tree, two targets.
+          doc = parse_file(Path("data/docs/h04-merged.html"))
+          md_text, md_losses = emit(doc, "markdown")
+          wiki_text, wiki_losses = emit(doc, "wiki")
+          assert "| Q1 | Q1 | Q2 |" in md_text and len(md_losses) == 1
+          assert 'colspan="2"' in wiki_text and wiki_losses == []
+
+          # Every merged-cell document is silent for markdown and none for wiki.
+          md, wiki = reports["markdown"], reports["wiki"]
+          spans = {d.doc_id for d in md.docs if d.features.get("merged_cell", 0)}
+          assert spans and spans <= set(md.silent_docs)
+          assert not (spans & set(wiki.silent_docs))
+          assert wiki.by_fidelity.get("invented", 0) == 0
+
+          # A target with no parser reports null, never a number.
+          js = reports["json"]
+          assert not js.round_trippable
+          assert all(d.values_after is None for d in js.docs)
+          assert js.silent_docs == () and js.unmeasurable_docs
+          print(f"{len(md.silent_docs)} of {len(md.docs)} silent; {len(spans)} merged-cell docs all silent")
+          PY
+
+      - name: check gates on what is fixable, not on the world
+        run: |
+          doc-consolidator check
+          doc-consolidator check | grep -q 'Reported and NOT failed on'
+          doc-consolidator check | grep -q 'heading skips:              4'
+          doc-consolidator check | grep -q 'merged-cell grid positions: 7'
+          doc-consolidator check | grep -q 'switched off inside a week'
+          doc-consolidator check | grep -q PASS
+
+          mkdir -p /tmp/bad && printf '\x00\x01' > /tmp/bad/scan.tiff
+          ! DC_DOCS=/tmp/bad doc-consolidator check
+          DC_DOCS=/tmp/bad doc-consolidator check | grep -q 'no parser for 1' || true
+
+          mkdir -p /tmp/span && cat > /tmp/span/t.html <<'HTML'
+          <h1>T</h1><table><tr><th colspan="2">Q1</th></tr><tr><td>a</td><td>b</td></tr></table>
+          HTML
+          DC_DOCS=/tmp/span doc-consolidator check
+          DC_DOCS=/tmp/span doc-consolidator check | grep -q 'merged-cell grid positions: 1'
+          echo "a spanning header alone does not gate"
+
+      - name: Every command publishes its reasoning
+        run: |
+          doc-consolidator matrix | grep -q 'A pipe row holds'
+          doc-consolidator matrix | grep -q 'this tool does not OCR'
+          doc-consolidator compare | grep -q 'belongs to the FORMAT, not to the reader'
+          doc-consolidator compare | grep -q 'choosing presentation on their behalf'
+          doc-consolidator compare | grep -q 'markdown loses 18 where wiki loses 8'
+          doc-consolidator report | grep -q "cannot see the second question's failure"
+          doc-consolidator collapse | grep -q 'exactly Catalan(n) while n <= 6'
+          doc-consolidator collapse --max-n 7 | grep -q 'differs'
+          doc-consolidator outline h02-skip | grep -q 'Neither is a fix'
+          doc-consolidator outline h03-starts-deep | grep -q 'level 0 -> 3'
+          doc-consolidator table h04-merged | grep -q 'distinct-value SET unchanged'
+          doc-consolidator table h06-ragged | grep -q 'no grid exists'
+          doc-consolidator encoding | grep -q 'never a necessity'
+          doc-consolidator encoding | grep -q 'PREFERRED, not detected'
+          doc-consolidator convert h04-merged --target wiki | grep -q 'holds every feature'
+          doc-consolidator explain h04-merged | grep -q 'BEFORE any conversion'
+          doc-consolidator doctor | grep -q 'rest on IMPLEMENTATION behaviour'
+          echo "all commands explain themselves"

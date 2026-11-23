@@ -1,0 +1,7 @@
+= Checklist =
+* Confirm the order
+** Check the address
+** Check the payment
+* Dispatch
+# First numbered
+# Second numbered

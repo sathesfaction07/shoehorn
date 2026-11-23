@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doc-consolidator"
+version = "0.1.0"
+description = "Consolidates documents from four formats, and reports what the TARGET format cannot hold"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.6,<3.0",
+    "pydantic-settings>=2.2,<3.0",
+    "click>=8.1,<9.0",
+    # HTML: html5lib parses like a browser, so malformed markup recovers the way a
+    # reader would see it rather than the way a strict parser would reject it.
+    "beautifulsoup4>=4.12,<5.0",
+    "html5lib>=1.1,<2.0",
+    # DOCX: the only way to reach cell text and style names in an OOXML package.
+    "python-docx>=1.1,<2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+doc-consolidator = "doc_consolidator.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+pythonpath = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
+
+[tool.coverage.run]
+source = ["doc_consolidator"]
+branch = true

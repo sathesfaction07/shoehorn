@@ -1,0 +1,5 @@
+= Product Taxonomy =
+==== Level four, straight after level one ====
+The intervening levels were never written.
+== Level two ==
+Arrives later.

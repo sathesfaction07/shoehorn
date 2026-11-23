@@ -1,0 +1,53 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: check-merge-conflict
+
+  - repo: local
+    hooks:
+      # The corpus must keep producing every outcome the tests assert about. A missing
+      # value makes those assertions vacuous rather than failing, which is the quiet way
+      # a corpus stops testing anything. LOSSY is asserted ABSENT -- its unreachability
+      # is the finding, not an oversight.
+      - id: corpus-still-exercises-every-case
+        name: the corpus still produces every documented outcome
+        entry: >
+          python -c "import sys; sys.path.insert(0, 'src');
+          from pathlib import Path;
+          from doc_consolidator.emit import census;
+          from doc_consolidator.measure import build_report;
+          from doc_consolidator.models import Feature, Fidelity;
+          from doc_consolidator.parse import parse_file;
+          d = Path('data/docs');
+          docs = [parse_file(p) for p in sorted(d.iterdir()) if p.is_file()];
+          seen = set().union(*[set(census(x)) for x in docs]);
+          missing = set(Feature) - seen - {Feature.FOOTNOTE};
+          assert not missing, f'corpus no longer contains {sorted(f.value for f in missing)}';
+          fid = set();
+          [fid.update(build_report(d, t).by_fidelity) for t in ('markdown','wiki','plain')];
+          gaps = {f.value for f in Fidelity} - {Fidelity.EXACT.value} - fid;
+          assert not gaps, f'no longer produces fidelity {sorted(gaps)}';
+          r = build_report(d, 'markdown');
+          spans = {x.doc_id for x in r.docs if x.features.get('merged_cell', 0)};
+          assert spans, 'corpus contains no merged cells';
+          assert spans <= set(r.silent_docs), f'merged cells no longer silent: {spans - set(r.silent_docs)}';
+          assert r.encoding_counts.get('mojibake') == 2, r.encoding_counts;
+          assert 'lossy' not in r.encoding_counts, 'LOSSY should be unreachable';
+          print(f'{len(docs)} docs, {len(spans)} merged-cell docs all silent, all outcomes present')"
+        language: system
+        pass_filenames: false
+        files: ^data/

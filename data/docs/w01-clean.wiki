@@ -1,0 +1,6 @@
+= Escalation Runbook =
+This page describes the escalation path.
+== Severity 1 ==
+Page the duty engineer immediately.
+== Severity 2 ==
+Raise a ticket before the end of the working day.
