@@ -6,14 +6,14 @@ Accepted
 
 ## Context
 
-The brief rates four approaches to this problem by parser quality — BeautifulSoup and friends
+The project brief rates four approaches to this problem by parser quality — BeautifulSoup and friends
 at "~90% (misses images-with-text, breaks on exotic formatting)", Docling at ~95%, cloud OCR at
 "~99% on PDFs", a hybrid at ~97% — and concludes: *"Hybrid routing by format."*
 
 Two things came out of checking that before building.
 
 **The routing already exists.** Certainty dispatches on file extension, renders PDFs through
-PyMuPDF and has a Textract backend. So the brief's headline recommendation is built, one
+PyMuPDF and has a Textract backend. So the project brief's headline recommendation is built, one
 directory across.
 
 **And it would not have helped.** Markdown has no construct for a merged table cell. No parser,
@@ -21,7 +21,7 @@ no layout model and no OCR service changes that, because it is a property of mar
 A perfect reader feeding a perfect tree into a pipe-table renderer still has to decide what to
 put in a grid position the source never filled.
 
-So the brief measures the wrong axis. Parser quality is real and it is not the binding
+So the project brief measures the wrong axis. Parser quality is real and it is not the binding
 constraint.
 
 ## Decision
@@ -30,7 +30,7 @@ constraint.
 
 `Expressiveness` is three-valued — `NATIVE`, `APPROXIMATE`, `ABSENT` — per (target, feature).
 A hardcoded table of assertions about file formats is exactly how folklore gets into a codebase,
-and this portfolio has already caught six confident comments that turned out false. So:
+and these projects have already caught six confident comments that turned out false. So:
 
 - every non-`NATIVE` entry must carry a `reason`, enforced in the constructor
 - `verify_claims()` re-derives the arithmetic ones at runtime
@@ -136,6 +136,6 @@ sniffing" for metadata that was likewise declared, and that entry had to be corr
 - This is the same *shape* as Kinship's finding that blocking sets a recall ceiling no matcher
   can exceed, and saying so is better than implying novelty. The difference is that blocking keys
   are a free choice while a publishing target usually is not — you often must publish to the wiki
-- The cloud-OCR routing in the brief was declined rather than rebuilt, and the reason is
+- The cloud-OCR routing in the project brief was declined rather than rebuilt, and the reason is
   duplication rather than disagreement: for a scanned PDF, Textract genuinely is the right answer
   and Certainty already calls it

@@ -65,7 +65,7 @@ blank      Q1|   / Jan|Feb   blanked=1      distinct values 3
 The source said **neither** — and look at the last column: **both leave the set of distinct values
 unchanged.**
 
-So the spec's single question is really two, and the first one's checker cannot see the second
+So the project brief's single question is really two, and the first one's checker cannot see the second
 one's failure:
 
 > **13 of 23 documents** lose structure for markdown while a round-tripped value-set comparison
@@ -147,7 +147,7 @@ them. And the stronger form:
 > strings.
 
 Every `errors="replace"` is therefore a decision to discard information that could have been kept.
-The portfolio contains one: Certainty's `read_text_file`.
+The sibling projects contain one: Certainty's `read_text_file`.
 
 `AMBIGUOUS` records that four codecs accepted the same bytes and produced **three different
 strings**, and that cp1252 was **preferred, not detected**.
@@ -160,7 +160,7 @@ the scan is per line, and the corpus carries both cases.
 
 ---
 
-## Two Defects in Existing Portfolio Code, Verified
+## Two Defects in Sibling Projects' Code, Verified
 
 **Certainty's `read_docx_file` drops every table.** It does
 `[p.text for p in doc.paragraphs]`, and `doc.paragraphs` excludes cell text entirely. On a
@@ -245,7 +245,7 @@ have made a completeness check report *more* content after conversion than the s
 
 ## Scope: What This Deliberately Does Not Do
 
-**Route PDFs to Textract or Document AI**, which the brief asks for. Certainty already does
+**Route PDFs to Textract or Document AI**, which the project brief asks for. Certainty already does
 it, and for a scanned PDF that genuinely is the right answer. Declined as duplication, not
 disagreement.
 
@@ -256,8 +256,8 @@ clustering and cluster metrics — and rebuilding it here would be a worse copy.
 Said plainly because Headcount shipped a claim of "content-based format sniffing" for metadata
 that was likewise declared, and that entry needed correcting later.
 
-The diligence check found heading handling, `colspan`/`rowspan`, document outlines,
-BeautifulSoup, wiki markup and mojibake detection **absent portfolio-wide** (0 files each).
+A survey of the sibling projects found heading handling, `colspan`/`rowspan`, document outlines,
+BeautifulSoup, wiki markup and mojibake detection **absent from all of them** (0 files each).
 Polarity builds a tree, but it is an AST for boolean expressions — so tree-building is a repeat
 mechanism and is named as one. What is new is that this map is **not injective**.
 

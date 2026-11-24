@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The brief states the accuracy concern as one question: *"Did we extract ALL content correctly and
+The project brief states the accuracy concern as one question: *"Did we extract ALL content correctly and
 preserve structure?"*
 
 That is two questions joined by an "and", and the second one fails in a way the first one's
@@ -96,7 +96,7 @@ them. And the stronger form:
 > byte strings.
 
 So every `errors="replace"` in a codebase is a decision to discard information that could have
-been kept. The portfolio contains one: Certainty's `read_text_file`.
+been kept. The sibling projects contain one: Certainty's `read_text_file`.
 
 `Decoding` has four values because "we decoded it" is not one claim. `AMBIGUOUS` records that four
 codecs accepted the bytes and produced **three different strings**, and that cp1252 was

@@ -45,7 +45,7 @@ No model. The accuracy problem is grammar and arithmetic.
 │                                                                              │
 │  Capability  every non-NATIVE claim MUST carry a `reason`, enforced in the     │
 │    constructor. A hardcoded table of assertions about file formats is how      │
-│    folklore gets into a codebase, and this portfolio has caught six confident  │
+│    folklore gets into a codebase, and these projects have caught six confident│
 │    comments that turned out false.                                            │
 │                                                                              │
 │    The strongest claims are ARITHMETIC rather than cited:                      │
@@ -243,7 +243,7 @@ No model. The accuracy problem is grammar and arithmetic.
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                             measure.py                                        │
 │                                                                              │
-│  The brief asks ONE question with TWO halves: "did we extract ALL content      │
+│  The project brief asks ONE question with TWO halves: "did we extract ALL content      │
 │  correctly AND preserve structure?" A checker for the first CANNOT SEE a       │
 │  failure of the second.                                                       │
 │                                                                              │
